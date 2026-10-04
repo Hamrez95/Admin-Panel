@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mazeduneh_admin/professional_demo_main.dart';
+import 'package:commerce_admin/professional_demo_main.dart';
 
 Future<void> signInToProfessionalDemo(WidgetTester tester) async {
   await tester.tap(find.text('پرکردن خودکار'));
@@ -19,11 +19,11 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
-    await tester.pumpWidget(const MazedunehProfessionalDemoApp());
+    await tester.pumpWidget(const CommerceAdminPreviewApp());
     await tester.pumpAndSettle();
 
     expect(find.text('ورود به پنل مدیریت'), findsOneWidget);
-    expect(find.text('admin@mazeduneh.ir'), findsOneWidget);
+    expect(find.text('demo@commerce-admin.local'), findsOneWidget);
 
     await signInToProfessionalDemo(tester);
 
@@ -38,7 +38,7 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
-    await tester.pumpWidget(const MazedunehProfessionalDemoApp());
+    await tester.pumpWidget(const CommerceAdminPreviewApp());
     await tester.pumpAndSettle();
     await signInToProfessionalDemo(tester);
 
