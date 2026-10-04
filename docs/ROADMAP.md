@@ -1,6 +1,6 @@
 # Commerce Admin: product scope and prioritized backlog
 
-Status of every ticket: **Backlog**. Work in ID order within each priority, respecting dependencies. Keep each ticket small enough to review and ship independently. Update status and acceptance notes in this file as work lands.
+This backlog is maintained on `dev`; `main` receives a completed foundation slice or a complete product module. Work in ID order within each priority, respecting dependencies. Keep each ticket small enough to review and ship independently. Update status and acceptance notes in this file as work lands.
 
 ## Product goal
 
@@ -13,6 +13,8 @@ The interaction direction is a fast, calm, app-like workspace: persistent naviga
 - A “store” is a connected commerce system. A workspace can contain multiple stores, subject to permissions and connector capabilities.
 - “Connect any store” means a clear path for supported platforms plus a documented adapter/API path for custom stores. A custom website without an API, webhook, or installable connector cannot be connected automatically.
 - The UI depends on a stable commerce contract and advertised connector capabilities. It must not contain platform-specific API assumptions.
+- Treat each product area as an independently entitled module with a stable module ID, published boundary, declared dependencies, and its own release acceptance. Keep platform/profile/settings available as the host shell. A user profile can hide or show modules the workspace is entitled to; only a workspace owner can manage module entitlements, and the server must enforce access regardless of navigation visibility.
+- Disabling a module hides its entry points and denies its protected operations without deleting its data. Dependent modules cannot be enabled unless required modules are entitled; automations and sync jobs owned by a disabled module must be paused safely.
 - Keep Mazeduneh as the first real reference connector and regression target. Keep a deterministic demo store with synthetic fixtures so design and workflows work without credentials or external services. Never put secrets or real customer data in demo fixtures.
 - Start with a modular monolith and explicit module boundaries. Add independent services only when measured operational needs justify them.
 - Finance and tax screens must clearly distinguish operational summaries from jurisdiction-specific accounting or tax advice. Support exports and integrations before claiming full statutory compliance.
@@ -26,20 +28,20 @@ The first milestone should let a small store team connect a demo store and one r
 ### P0 — Product and technical foundation
 
 #### AP-001 — Record the target architecture and migration path
-**Priority:** P0 · **Status:** Backlog · **Depends on:** —
+**Priority:** P0 · **Status:** Done on `dev` · **Depends on:** —
 
-Inspect the existing Flutter app and document the smallest architecture that safely supports a reusable client and secure store integrations. Decide and record the client/server boundary, domain modules, API contract strategy, connector execution location, data ownership, and how the current Mazeduneh API fits during migration. Prefer a modular monolith; do not introduce interfaces, layers, queues, or services without a concrete second implementation or operational need.
+Inspect the existing Flutter app and document the smallest architecture that safely supports a reusable client and secure store integrations. Decide and record the client/server boundary, domain modules, API contract strategy, connector execution location, data ownership, module entitlements/profile visibility, and how the current Mazeduneh API fits during migration. Prefer a modular monolith; do not introduce interfaces, layers, queues, or services without a concrete second implementation or operational need.
 
-**Acceptance:** An ADR includes a current-state diagram, target module boundaries, dependency direction, migration slices, and explicit trade-offs. The plan preserves a runnable Mazeduneh path while removing its special status from shared UI.
+**Acceptance:** An ADR includes a current-state diagram, target module boundaries, dependency direction, module entitlement rules, migration slices, and explicit trade-offs. It records the current source-integrity issue as a gate before changing entrypoints and preserves Mazeduneh as an optional reference connector.
 
 **Engineering:** Apply Clean Code and Clean Architecture: meaningful names, inward dependencies, explicit boundaries, and no speculative abstractions. Use the clean-architecture skill when deciding module and connector boundaries.
 
 #### AP-002 — Generalize the app identity and configuration
-**Priority:** P0 · **Status:** Backlog · **Depends on:** AP-001
+**Priority:** P0 · **Status:** Done on `dev` · **Depends on:** AP-001
 
-Remove Mazeduneh-only identity from the product name, package metadata, app title, and default configuration. Make API/environment configuration explicit and safe; keep store identity and connector configuration out of global constants. Preserve Mazeduneh branding only inside its connector/demo fixtures.
+Remove Mazeduneh-only identity from the product name, package metadata, app title, and default configuration. Make API/environment configuration explicit and safe; keep store identity and connector configuration out of global constants. Preserve the old environment variable as a compatibility fallback for the Mazeduneh reference connector.
 
-**Acceptance:** The app launches with generic Commerce Admin identity; a developer can select demo or a configured backend without editing source; no default live endpoint or credential is embedded in the app.
+**Acceptance:** Flutter package and app titles use generic Commerce Admin identity; the API base URL can be configured at build time using `COMMERCE_ADMIN_API_BASE_URL`; the previous `MAZEDUNEH_API_BASE_URL` remains a fallback; no default live endpoint or credential is embedded in the app.
 
 **Engineering:** Apply Clean Code and Clean Architecture, preserve behavior with focused characterization coverage, and avoid broad renames that obscure the diff.
 
@@ -52,12 +54,12 @@ Create the product design direction, design tokens, shared navigation, store swi
 
 **Engineering:** Apply Clean Code and Clean Architecture; use Frontend Design and Accessibility Audit skills for UI decisions. Keep presentation reusable and keep business rules out of widgets.
 
-#### AP-004 — Add workspace, store, user, role, and audit foundations
+#### AP-004 — Add workspace, store, role, module entitlement, and audit foundations
 **Priority:** P0 · **Status:** Backlog · **Depends on:** AP-001, AP-003
 
-Define workspace and store membership, invitations, role-based permissions, session lifecycle, and an append-only audit trail for sensitive actions. Keep authentication and authorization decisions server-side; the client only presents permitted actions.
+Define workspace and store membership, invitations, role-based permissions, session lifecycle, and an append-only audit trail for sensitive actions. Add a module catalog with stable IDs, declared dependencies, workspace entitlements, and per-user profile visibility preferences. Keep authentication and authorization decisions server-side; the client only presents permitted actions.
 
-**Acceptance:** A workspace can contain stores and members; roles are least-privilege and checked for read/write actions; sensitive changes record actor, store, action, timestamp, and outcome; removing a member revokes access.
+**Acceptance:** A workspace can contain stores and members; roles are least-privilege and checked for read/write actions; workspace owners can enable entitled modules; users can hide/show entitled modules in their profile; profile visibility never grants a license or bypasses server authorization; disabling a module preserves its data and safely pauses its jobs; dependency conflicts are explained; sensitive changes record actor, workspace, module, action, timestamp, and outcome; removing a member revokes access.
 
 **Engineering:** Apply Clean Code and Clean Architecture; define authorization at use-case boundaries, avoid trusting UI state, and add focused tests for denied access and audit behavior.
 

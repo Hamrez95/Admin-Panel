@@ -1,5 +1,5 @@
-name: mazeduneh_admin
-description: Responsive administration application for MAZEDUNEH.
+name: commerce_admin
+description: Multi-store commerce administration application.
 publish_to: none
 version: 0.2.0+2
 
